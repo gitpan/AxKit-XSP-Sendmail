@@ -1,5 +1,11 @@
 Revision history for Perl extension AxKit::XSP::Sendmail.
 
+1.41
+    - Kjetil Kjernsmo, kjetilk@cpan.org took over maintainership.
+    - Added documentation for the subject tag.
+    - Added a MANIFEST.SKIP
+    - A bit of documentation cleanup and typo corrections.
+
 1.4
     - Updated to AxKit 1.4 API
     - Robin's changes adding charset conversion and a few cleanups

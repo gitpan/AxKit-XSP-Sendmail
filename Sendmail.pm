@@ -1,4 +1,4 @@
-# $Id: Sendmail.pm,v 1.11 2001/06/05 11:34:59 matt Exp $
+# $Id: Sendmail.pm,v 1.14 2004/12/15 00:00:21 kjetil Exp $
 
 package AxKit::XSP::Sendmail;
 use strict;
@@ -13,7 +13,7 @@ use vars qw/@ISA $NS $VERSION $ForwardXSPExpr/;
 @ISA = ('Apache::AxKit::Language::XSP');
 $NS = 'http://axkit.org/NS/xsp/sendmail/v1';
 
-$VERSION = "1.4";
+$VERSION = "1.41";
 
 ## Taglib subs
 
@@ -157,7 +157,7 @@ __END__
 
 =head1 NAME
 
-AxKit::XSP::Sendmail - Simple SMTP mailer tag library for AxKit eXtesible Server Pages.
+AxKit::XSP::Sendmail - Simple SMTP mailer tag library for AxKit eXtensible Server Pages.
 
 =head1 SYNOPSIS
 
@@ -183,64 +183,68 @@ of the same name, albeit in a different namespace..
 
 =head1 Tag Reference
 
-=head2 C<<sendmail:send-mail>>
+=head2 C<E<lt>sendmail:send-mailE<gt>>
 
 This is the required 'wrapper' element for the sendmail taglib branch.
 
-=head2 C<<sendmail:smtphost>>
+=head2 C<E<lt>sendmail:smtphostE<gt>>
 
 The this element sets the outgoing SMTP server for the current message.
-If ommitted, the default set in Mail::Sendmail's %mailcfg hash will be
+If ommitted, the default set in L<Mail::Sendmail>'s %mailcfg hash will be
 used instead. 
 
-=head2 C<<sendmail:from>>
+=head2 C<E<lt>sendmail:fromE<gt>>
 
 Defines the 'From' field in the outgoing message. If ommited, this
-field defaults to value set in Mail::Sendmail's %mailcfg hash. Run
+field defaults to value set in L<Mail::Sendmail>'s %mailcfg hash. Run
 C<perldoc Mall:Sendmail> for more detail.
 
-=head2 C<<sendmail:to>>
+=head2 C<E<lt>sendmail:toE<gt>>
 
 Defines a 'To' field in the outgoing message. Multiple instances are
 allowed.
 
-=head2 C<<sendmail:cc>>
+=head2 C<E<lt>sendmail:ccE<gt>>
 
 Defines a 'Cc' field in the outgoing message. Multiple instances are
 allowed.
 
-=head2 C<<sendmail:bcc>>
+=head2 C<E<lt>sendmail:bccE<gt>>
 
 Defines a 'Bcc' field in the outgoing message. Multiple instances are
 allowed.
 
-=head2 C<<sendmail:content-type>>
+=head2 C<E<lt>sendmail:subjectE<gt>>
+
+Defines the subject of the message.
+
+=head2 C<E<lt>sendmail:content-typeE<gt>>
 
 Defines the content-type of the body of the message (default: text/plain).
 
-=head2 C<<sendmail:content-transfer-encoding>>
+=head2 C<E<lt>sendmail:content-transfer-encodingE<gt>>
 
 Defines the content-transfer-encoding of the body of the message. The
 default depends on whether you have MIME::QuotedPrint available or not.
 If you do, it defaults to 'quoted-printable', and if you don't to '8bit';
 
-=head2 C<<sendmail:charset>>
+=head2 C<E<lt>sendmail:charsetE<gt>>
 
 Defines the charset of the body of the message (default: utf-8). Your
 system's iconv implementation needs to support converting from utf-8
 to that character set otherwise sending email will fail.
 
-=head2 C<<sendmail:body>>
+=head2 C<E<lt>sendmail:bodyE<gt>>
 
 Defines the body of the outgoing message.
 
-=head2 C<<sendmail:message>>
+=head2 C<E<lt>sendmail:messageE<gt>>
 
-This tag is interchangable with C<<sendmail:body>>.
+This tag is interchangable with C<E<lt>sendmail:bodyE<gt>>.
 
 =head1 EXAMPLE
 
-my $mail_message = 'I\'m a victim of circumstance!';
+  my $mail_message = 'I\'m a victim of circumstance!';
 
   <sendmail:send-mail>
     <sendmail:from>curly@localhost</sendmail:from>
@@ -260,6 +264,9 @@ taglib.
 
 Kip Hampton, khampton@totalcinema.com
 
+Kjetil Kjernsmo, kjetilk@cpan.org has taken over maintainership of
+this module as of 1.41.
+
 =head1 COPYRIGHT
 
 Copyright (c) 2001 Kip Hampton. All rights reserved. This program is
@@ -268,6 +275,6 @@ terms as Perl itself.
 
 =head1 SEE ALSO
 
-AxKit, Mail::Sendmail, Email::Valid
+L<AxKit>, L<Mail::Sendmail>, L<Email::Valid>
 
 =cut

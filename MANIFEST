@@ -1,5 +1,7 @@
 Changes
 Makefile.PL
 MANIFEST
+MANIFEST.SKIP
 Sendmail.pm
 t/01basic.t
+META.yml                                 Module meta-data (added by MakeMaker)
