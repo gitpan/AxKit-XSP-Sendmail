@@ -1,0 +1,14 @@
+Revision history for Perl extension AxKit::XSP::Sendmail.
+
+
+0.06  Feb 13 2001
+        - fixes to allow <xsp:expr> for all fields.
+	- moved to new namespce.
+
+
+0.05  Feb 08 2001
+	- Public release.
+
+0.01  Wed Jan 31 11:10:34 2001
+	- original version; created by h2xs 1.19
+
