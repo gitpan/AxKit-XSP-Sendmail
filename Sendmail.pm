@@ -1,4 +1,4 @@
-# $Id: Sendmail.pm,v 1.7 2001/02/16 22:04:14 matt Exp $
+# $Id: Sendmail.pm,v 1.11 2001/06/05 11:34:59 matt Exp $
 
 package AxKit::XSP::Sendmail;
 use strict;
@@ -6,13 +6,14 @@ use Apache::AxKit::Language::XSP;
 use Mail::Sendmail;
 use Email::Valid;
 use Carp;
+use Apache::AxKit::CharsetConv;
 
 use vars qw/@ISA $NS $VERSION $ForwardXSPExpr/;
 
 @ISA = ('Apache::AxKit::Language::XSP');
 $NS = 'http://axkit.org/NS/xsp/sendmail/v1';
 
-$VERSION = "1.0";
+$VERSION = "1.4";
 
 ## Taglib subs
 
@@ -37,6 +38,19 @@ sub send_mail {
     unless ( Email::Valid->address($mailer_args->{From}) ) { 
         $address_errors .= "Address '$mailer_args->{From}' in 'From' element failed $Email::Valid::Details check. ";
     }
+
+    # set the content-type
+    $mailer_args->{'Content-Type'} = ($mailer_args->{'Content-Type'})? $mailer_args->{'Content-Type'} : 'text/plain';
+    $mailer_args->{'Content-Type'} .= '; charset=';
+    $mailer_args->{'Content-Type'} .= ($mailer_args->{'charset'})?      $mailer_args->{'charset'} : 'utf-8';
+
+    # munge the text if it needs to be
+    if ($mailer_args->{'charset'} and lc($mailer_args->{'charset'}) ne 'utf-8') {
+        my $conv = Apache::AxKit::CharsetConv->new('utf-8',$mailer_args->{'charset'})
+                or croak "No such charset: $mailer_args->{'charset'}";
+        $mailer_args->{'message'} = $conv->convert($mailer_args->{'message'});
+    }
+
 
     if ($address_errors) {
         croak "Invalid Email Address(es): $address_errors";
@@ -66,7 +80,18 @@ sub parse_start {
     elsif ($tag eq 'bcc') {
         return q| push (@bcc_addrs, ''|;
     }
-    elsif ($tag =~ /^(subject|message|from)$/) {
+    elsif ($tag eq 'content-type') {
+        return q| $mail_args{'Content-Type'} = ''|;
+    }
+    elsif ($tag eq 'content-transfer-encoding') {
+        return q| $mail_args{'Content-Transfer-Encoding'} = ''|;
+    }
+    elsif ($tag eq 'charset') {
+        return q| $mail_args{'charset'} = ''|;
+    }
+    elsif ($tag =~ /^(subject|message|from|body)$/) {
+        $tag = "From" if $tag eq 'from';
+        $tag = "message" if $tag eq 'body';
         return qq| \$mail_args{'$tag'} = "" |;
     }
     elsif ($tag eq 'smtphost') {
@@ -89,7 +114,9 @@ sub parse_char {
 
     return '' unless $text;
 
-    return qq| . '$text' |;
+    $text =~ s/\|/\\\|/g;
+    $text =~ s/\\$/\\\\/gsm;
+    return " . q|$text| ";
 }
 
 
@@ -187,13 +214,33 @@ allowed.
 Defines a 'Bcc' field in the outgoing message. Multiple instances are
 allowed.
 
+=head2 C<<sendmail:content-type>>
+
+Defines the content-type of the body of the message (default: text/plain).
+
+=head2 C<<sendmail:content-transfer-encoding>>
+
+Defines the content-transfer-encoding of the body of the message. The
+default depends on whether you have MIME::QuotedPrint available or not.
+If you do, it defaults to 'quoted-printable', and if you don't to '8bit';
+
+=head2 C<<sendmail:charset>>
+
+Defines the charset of the body of the message (default: utf-8). Your
+system's iconv implementation needs to support converting from utf-8
+to that character set otherwise sending email will fail.
+
 =head2 C<<sendmail:body>>
 
 Defines the body of the outgoing message.
 
+=head2 C<<sendmail:message>>
+
+This tag is interchangable with C<<sendmail:body>>.
+
 =head1 EXAMPLE
 
-my $mail_message = 'I'm a victim of circumstance!';
+my $mail_message = 'I\'m a victim of circumstance!';
 
   <sendmail:send-mail>
     <sendmail:from>curly@localhost</sendmail:from>

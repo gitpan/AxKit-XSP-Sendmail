@@ -4,4 +4,8 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'	=> 'AxKit::XSP::Sendmail',
     'VERSION_FROM' => 'Sendmail.pm', # finds $VERSION
+    'PREREQ_PM' => { AxKit => 1.4,
+                     Mail::Sendmail => 0,
+                     Email::Valid => 0,
+                   },
 );

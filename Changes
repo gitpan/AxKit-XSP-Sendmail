@@ -1,5 +1,8 @@
 Revision history for Perl extension AxKit::XSP::Sendmail.
 
+1.4
+    - Updated to AxKit 1.4 API
+    - Robin's changes adding charset conversion and a few cleanups
 
 0.06  Feb 13 2001
         - fixes to allow <xsp:expr> for all fields.
