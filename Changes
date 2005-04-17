@@ -1,5 +1,11 @@
 Revision history for Perl extension AxKit::XSP::Sendmail.
 
+1.5  2005-04-17
+    - Merging changes from 1.41 and axkit.org CVS.
+	* Adds a new generic header tag.
+	* Add option to trim spaces in 'to' fields. 
+    - Kjetil signs the distribution with his PGP key.
+
 1.41
     - Kjetil Kjernsmo, kjetilk@cpan.org took over maintainership.
     - Added documentation for the subject tag.

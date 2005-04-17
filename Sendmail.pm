@@ -1,4 +1,4 @@
-# $Id: Sendmail.pm,v 1.14 2004/12/15 00:00:21 kjetil Exp $
+# $Id: Sendmail.pm,v 1.15 2005/04/13 16:04:21 kjetil Exp $
 
 package AxKit::XSP::Sendmail;
 use strict;
@@ -8,12 +8,12 @@ use Email::Valid;
 use Carp;
 use Apache::AxKit::CharsetConv;
 
-use vars qw/@ISA $NS $VERSION $ForwardXSPExpr/;
+use vars qw/@ISA $NS $VERSION $ForwardXSPExpr $TRIM_FIELD/;
 
 @ISA = ('Apache::AxKit::Language::XSP');
 $NS = 'http://axkit.org/NS/xsp/sendmail/v1';
 
-$VERSION = "1.41";
+$VERSION = "1.5";
 
 ## Taglib subs
 
@@ -66,6 +66,9 @@ sub send_mail {
 sub parse_start {
     my ($e, $tag, %attribs) = @_; 
     #warn "Checking: $tag\n";
+    
+    # check for trimming
+    $TRIM_FIELD = ($attribs{trim} eq 'no' ? 0 : 1);
 
     if ($tag eq 'send-mail') {
         return qq| {# start mail code\n | .
@@ -97,6 +100,9 @@ sub parse_start {
     elsif ($tag eq 'smtphost') {
         return q| $mail_args{'smtp'} = "" |;
     }
+    elsif ($tag eq 'header') {
+        return qq| \$mail_args{'$attribs{name}'} = ''|;
+    }
     else {
         die "Unknown sendmail tag: $tag";
     }
@@ -107,9 +113,9 @@ sub parse_char {
     my $element_name = $e->current_element();
 
 
-    unless ($element_name eq 'body') {
-        $text =~ s/^\s*//;
-        $text =~ s/\s*$//;
+    if ($element_name ne 'body' and $TRIM_FIELD) {
+	$text =~ s/^\s*//;
+	$text =~ s/\s*$//;
     }
 
     return '' unless $text;
@@ -123,6 +129,8 @@ sub parse_char {
 sub parse_end {
     my ($e, $tag) = @_;
 
+    $TRIM_FIELD = 1;
+    
     if ($tag eq 'send-mail') {
         return <<'EOF';
 AxKit::XSP::Sendmail::send_mail(
@@ -190,19 +198,22 @@ This is the required 'wrapper' element for the sendmail taglib branch.
 =head2 C<E<lt>sendmail:smtphostE<gt>>
 
 The this element sets the outgoing SMTP server for the current message.
-If ommitted, the default set in L<Mail::Sendmail>'s %mailcfg hash will be
+If omitted, the default set in L<Mail::Sendmail>'s %mailcfg hash will be
 used instead. 
 
 =head2 C<E<lt>sendmail:fromE<gt>>
 
-Defines the 'From' field in the outgoing message. If ommited, this
+Defines the 'From' field in the outgoing message. If omitted, this
 field defaults to value set in L<Mail::Sendmail>'s %mailcfg hash. Run
 C<perldoc Mall:Sendmail> for more detail.
 
 =head2 C<E<lt>sendmail:toE<gt>>
 
 Defines a 'To' field in the outgoing message. Multiple instances are
-allowed.
+allowed. By default this taglib will remove leading and trailing
+spaces from the value C<E<lt>sendmail:toE<gt>> contains. If you need
+to turn this off, simply set the C<trim> attribute to 'no'. The same
+can be done for all header fields.
 
 =head2 C<E<lt>sendmail:ccE<gt>>
 
@@ -233,6 +244,11 @@ If you do, it defaults to 'quoted-printable', and if you don't to '8bit';
 Defines the charset of the body of the message (default: utf-8). Your
 system's iconv implementation needs to support converting from utf-8
 to that character set otherwise sending email will fail.
+
+=head2 C<E<lt>sendmail:headerE<gt>>
+
+Allows you to add headers to the outgoing mail with the name specified
+in the C<name> attribute.
 
 =head2 C<E<lt>sendmail:bodyE<gt>>
 
